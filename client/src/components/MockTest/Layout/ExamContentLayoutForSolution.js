@@ -1,5 +1,3 @@
-
-
 // import React, { useState } from "react";
 // import "../../../styles/ExamContentLayout.css";
 
@@ -18,31 +16,35 @@
 //     return <div style={{ padding: "2rem", textAlign: "center" }}>Loading solution...</div>;
 //   }
 
-//   const selectedOption = currentQuestion.selectedAnswer;
-//   const correctAnswer = currentQuestion.correctAnswer;
-//   const isCorrect = currentQuestion.isCorrect;
+//   const selectedOption = answers[currentQuestion._id]?.selectedOption;
+//   const correctAnswer = answers[currentQuestion._id]?.correctAnswer;
+//   const isCorrect = answers[currentQuestion._id]?.isCorrect;
+  
 
 //   const getOptionStyle = (opt, idx) => {
 //     const val = String.fromCharCode(65 + idx);
 //     const normalize = (v) => Array.isArray(v) ? v.map(String).sort().join(",") : String(v);
 //     const selected = Array.isArray(selectedOption) ? selectedOption.includes(val) : normalize(selectedOption) === val;
 //     const correct = Array.isArray(correctAnswer) ? correctAnswer.includes(val) : normalize(correctAnswer) === val;
-
-//     if (selected && isCorrect) return "option-box correct";
-//     if (selected && !isCorrect) return "option-box incorrect";
+  
+ 
+  
+//     if (selected && correct) return "option-box correct";
+//     if (selected && !correct) return "option-box incorrect";
 //     if (!selected && correct) return "option-box highlight-correct";
 //     return "option-box";
 //   };
+  
+  
 
 //   const renderOptions = () => {
 //     if (currentQuestion.questionType === "Drag and Drop") {
-//       const terms = currentQuestion.terms || [];
 //       const correctPairs = {};
 //       (currentQuestion.definitions || []).forEach(def => {
 //         if (def && def.text && def.match) correctPairs[def.text] = def.match;
 //       });
 
-//       const studentPairs = selectedOption || {}; // object of { definitionText: matchedTerm }
+//       const studentPairs = selectedOption || {};
 
 //       return (
 //         <div className="drag-drop-solution-edzest">
@@ -104,48 +106,65 @@
 //           </div>
 //         </div>
 
-//         <div className="question-box">
-//           <h3>Q{currentQuestionIndex + 1}: {currentQuestion.question}</h3>
-//           {renderOptions()}
+//         <div className="row">
+//           <div className={showExplanation ? "col-md-7" : "col-md-12"}>
+//             <div className="question-box">
+//               <h3>Q{currentQuestionIndex + 1}: {currentQuestion.question}</h3>
+//               {renderOptions()}
 
-//           <button
-//             className="explanation-toggle"
-//             onClick={() => setShowExplanation((prev) => !prev)}
-//           >
-//             {showExplanation ? "Hide Explanation" : "Show Explanation"}
-//           </button>
+//               <button
+//                 className="explanation-toggle bg"
+//                 onClick={() => setShowExplanation((prev) => !prev)}
+//               >
+//                 {showExplanation ? "➤ Hide Explanation" : "Explanation ➤ "}
+//               </button>
+//             </div>
 
-//           {showExplanation && (
-//             <div className="explanation-box">
-//               {currentQuestion.questionType === "Drag and Drop" ? (
-//                 <div>
-//                   <p><strong>Explanation (Correct Matches):</strong></p>
-//                   <ul>
-//                     {(currentQuestion.definitions || []).map((def, idx) => (
-//                       <li key={idx}>{def.text} → {def.match}</li>
-//                     ))}
-//                   </ul>
-//                 </div>
+//             <div className="nav-buttons">
+//               <button
+//                 disabled={currentQuestionIndex === 0}
+//                 onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
+//               >Previous</button>
+//               {currentQuestionIndex === questions.length - 1 ? (
+//                 <button
+//                   className="btn btn-danger"
+//                   onClick={() => window.location.href = "/mock-tests"}
+//                 >
+//                   Close
+//                 </button>
 //               ) : (
-//                 <p>{currentQuestion.explanation || "No explanation provided."}</p>
+//                 <button
+//                   onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
+//                 >
+//                   Next
+//                 </button>
 //               )}
 //             </div>
-//           )}
-//         </div>
+//           </div>
 
-//         <div className="nav-buttons">
-//           <button
-//             disabled={currentQuestionIndex === 0}
-//             onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
-//           >
-//             Previous
-//           </button>
-//           <button
-//             disabled={currentQuestionIndex === questions.length - 1}
-//             onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-//           >
-//             Next
-//           </button>
+//           {showExplanation && (
+//             <div className="col-md-5">
+//               <div className="explanation-panel">
+//                 <div className="d-flex justify-content-between align-items-center">
+//                   <h5><span style={{ color: "#e53935" }}>✖</span> Answer Explanation</h5>
+//                   <button className="btn btn-sm btn-light" onClick={() => setShowExplanation(false)}>X</button>
+//                 </div>
+//                 <hr />
+//                 {currentQuestion.questionType === "Drag and Drop" ? (
+//                   <div>
+//                     <p><strong>Explanation (Correct Matches):</strong></p>
+//                     <ul>
+//                       {(currentQuestion.definitions || []).map((def, idx) => (
+//                         <li key={idx}>{def.text} → {def.match}</li>
+//                       ))}
+//                     </ul>
+//                   </div>
+//                 ) : (
+//                   <p>{currentQuestion.explanation || "No explanation provided."}</p>
+//                 )}
+//               </div>
+//             </div>
+//           )}
 //         </div>
 //       </div>
 
@@ -187,14 +206,11 @@
 
 // export default ExamContentLayoutForSolution;
 
-// ✅ Fully updated to mimic Edzest-style explanation layout
 
-// ✅ Updated with toggle button to open/close explanation on right
-// ✅ Final updated version with dynamic width for left column based on explanation toggle
 
 import React, { useState } from "react";
 import "../../../styles/ExamContentLayout.css";
-
+ 
 const ExamContentLayoutForSolution = ({
   test,
   answers,
@@ -202,39 +218,60 @@ const ExamContentLayoutForSolution = ({
   setCurrentQuestionIndex,
 }) => {
   const [showExplanation, setShowExplanation] = useState(false);
-
+ 
   const questions = test?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
-
+ 
   if (!currentQuestion) {
     return <div style={{ padding: "2rem", textAlign: "center" }}>Loading solution...</div>;
   }
-
-  const selectedOption = currentQuestion.selectedAnswer;
-  const correctAnswer = currentQuestion.correctAnswer;
-  const isCorrect = currentQuestion.isCorrect;
-
+ 
+  const selectedOption = answers[currentQuestion._id]?.selectedOption;
+  const correctAnswer = answers[currentQuestion._id]?.correctAnswer;
+  const isCorrect = answers[currentQuestion._id]?.isCorrect;
+ 
+  const normalizeArray = (v) => {
+    if (Array.isArray(v)) {
+      if (v.length === 1 && typeof v[0] === 'string' && v[0].includes(',')) {
+        console.log('💥 Backend sent combined string in array → splitting:', v[0]);
+        return v[0].split(',').map(s => s.trim());
+      }
+      return v.map(String);
+    }
+    if (typeof v === 'string' && v.includes(',')) {
+      console.log('💥 Backend sent combined string → splitting:', v);
+      return v.split(',').map(s => s.trim());
+    }
+    return [String(v)];
+  };
+ 
+ 
   const getOptionStyle = (opt, idx) => {
     const val = String.fromCharCode(65 + idx);
-    const normalize = (v) => Array.isArray(v) ? v.map(String).sort().join(",") : String(v);
-    const selected = Array.isArray(selectedOption) ? selectedOption.includes(val) : normalize(selectedOption) === val;
-    const correct = Array.isArray(correctAnswer) ? correctAnswer.includes(val) : normalize(correctAnswer) === val;
-
-    if (selected && isCorrect) return "option-box correct";
-    if (selected && !isCorrect) return "option-box incorrect";
-    if (!selected && correct) return "option-box highlight-correct";
-    return "option-box";
+    const selectedArr = normalizeArray(selectedOption);
+    const correctArr = normalizeArray(correctAnswer);
+ 
+    const isSelected = selectedArr.includes(val);
+    const isCorrectOption = correctArr.includes(val);
+ 
+    console.log('💥 DEBUG → val:', val, '| selectedArr:', selectedArr, '| correctArr:', correctArr, '| isSelected:', isSelected, '| isCorrectOption:', isCorrectOption);
+ 
+    if (isSelected && isCorrectOption) return 'option-box correct';
+    if (isSelected && !isCorrectOption) return 'option-box incorrect';
+    if (!isSelected && isCorrectOption) return 'option-box highlight-correct';
+    return 'option-box';
   };
-
+ 
+ 
   const renderOptions = () => {
     if (currentQuestion.questionType === "Drag and Drop") {
       const correctPairs = {};
       (currentQuestion.definitions || []).forEach(def => {
         if (def && def.text && def.match) correctPairs[def.text] = def.match;
       });
-
+ 
       const studentPairs = selectedOption || {};
-
+ 
       return (
         <div className="drag-drop-solution-edzest">
           <h3 className="section-title">Your Attempt</h3>
@@ -251,7 +288,7 @@ const ExamContentLayoutForSolution = ({
               </div>
             );
           })}
-
+ 
           <h3 className="section-title">Correct Matches:</h3>
           {(currentQuestion.definitions || []).map((def, idx) => (
             <div key={`c-${idx}`} className="match-card readonly">
@@ -263,7 +300,7 @@ const ExamContentLayoutForSolution = ({
         </div>
       );
     }
-
+ 
     if (Array.isArray(currentQuestion.options)) {
       return (
         <div className="options-container">
@@ -279,10 +316,10 @@ const ExamContentLayoutForSolution = ({
         </div>
       );
     }
-
+ 
     return null;
   };
-
+ 
   return (
     <div className="exam-container">
       <div className="exam-content">
@@ -294,13 +331,13 @@ const ExamContentLayoutForSolution = ({
             <p><strong>Time:</strong> {test.time || "--"} minutes</p>
           </div>
         </div>
-
+ 
         <div className="row">
           <div className={showExplanation ? "col-md-7" : "col-md-12"}>
             <div className="question-box">
               <h3>Q{currentQuestionIndex + 1}: {currentQuestion.question}</h3>
               {renderOptions()}
-
+ 
               <button
                 className="explanation-toggle bg"
                 onClick={() => setShowExplanation((prev) => !prev)}
@@ -308,30 +345,29 @@ const ExamContentLayoutForSolution = ({
                 {showExplanation ? "➤ Hide Explanation" : "Explanation ➤ "}
               </button>
             </div>
-
+ 
             <div className="nav-buttons">
               <button
                 disabled={currentQuestionIndex === 0}
                 onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
               >Previous</button>
               {currentQuestionIndex === questions.length - 1 ? (
-  <button
-    className="btn btn-danger"
-    onClick={() => window.location.href = "/mock-tests"}
-  >
-    Close
-  </button>
-) : (
-  <button
-    onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-  >
-    Next
-  </button>
-)}
-
+                <button
+                  className="btn btn-danger"
+                  onClick={() => window.location.href = "/mock-tests"}
+                >
+                  Close
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
+                >
+                  Next
+                </button>
+              )}
             </div>
           </div>
-
+ 
           {showExplanation && (
             <div className="col-md-5">
               <div className="explanation-panel">
@@ -357,7 +393,7 @@ const ExamContentLayoutForSolution = ({
           )}
         </div>
       </div>
-
+ 
       <div className="exam-sidebar">
         <div className="navigator">
           <h4>Question Navigator</h4>
@@ -381,7 +417,7 @@ const ExamContentLayoutForSolution = ({
             })}
           </div>
         </div>
-
+ 
         <div className="status-legend">
           <h4>Status Legend</h4>
           <ul>
@@ -393,5 +429,5 @@ const ExamContentLayoutForSolution = ({
     </div>
   );
 };
-
+ 
 export default ExamContentLayoutForSolution;

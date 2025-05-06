@@ -263,28 +263,28 @@
 
 
 
-import React, { useContext } from "react";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthProvider, { AuthContext } from "./components/MockTest/context/AuthContext";
 import SignIn from "./components/MockTest/page/SignIn";
 import SignUp from "./components/MockTest/page/SignUp";
 import AdminDashboard from "./components/MockTest/page/AdminDashboard";
-import UserDashboard from "./components/MockTest/page/UserDashboard";
+
 import ProtectedRoute from "./components/MockTest/protectedroutes/ProtectedRoute";
 import MockTestPage from "./components/MockTest/page/MockTestPage";
 import CreateMockTest from "./components/MockTest/page/CreateMockTest";
 import Exam from "./components/MockTest/page/Exam";
 import ProfilePage from "./components/MockTest/page/ProfilePage"; 
 
-import Management from "./components/MockTest/page/Management";
+
 import AddUserForm from "./components/MockTest/page/AddUserForm";
 import TeacherDashboard from "./components/MockTest/page/TeacherDashboard";
-import ManagementDashboard from "./components/MockTest/page/ManagementDashboard";
+
 import StudentDashboard from "./components/MockTest/page/StudentDashboard";
 import Account from "./components/MockTest/page/Accounts";
 import ForgotPassword from "./components/MockTest/page/ForgotPassword";
 import ResetPassword from "./components/MockTest/page/ResetPassword";
-import UserPage from './components/MockTest/page/UserPage';
+
 import SolutionPage from './components/MockTest/page/SolutionPage';
 import ReportPage from './components/MockTest/page/ReportPage';
 
@@ -306,8 +306,7 @@ function App() {
 }
 
 const AppRoutes = () => {
-    const { user } = useContext(AuthContext); // Access user context after AuthProvider wraps the component
-
+    
     return (
         
         <Routes>
@@ -315,6 +314,7 @@ const AppRoutes = () => {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
         <Route path = "/add-user" element={<AddUserForm/>}/>
+        <Route path="/accounts" element={ <Account/>} />
 
             {/* 🔹 Admin Protected Routes */}
             <Route
@@ -322,46 +322,33 @@ const AppRoutes = () => {
                 element={
                     <ProtectedRoute allowedRoles={["Admin"]}>
                         <AdminDashboard />
-                    </ProtectedRoute>
-                    
-                }
-                
-            />      
-            
-            <Route path="/accounts" element={ <Account/>} />
+                    </ProtectedRoute>                    
+                }                
+            />   
 
+            <Route
+            path="/student-dashboard"
+            element={
+                <ProtectedRoute allowedRoles={["Student", "Admin"]}>
+                <StudentDashboard />
+                </ProtectedRoute>
+            }
+            />
+            <Route
+            path="/teacher-dashboard"
+            element={
+                <ProtectedRoute allowedRoles={["Teacher", "Admin"]}>
+                <TeacherDashboard />
+                </ProtectedRoute>
+            }
+            />
 
-           <Route
-        path="/student-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["Student", "Admin"]}>
-            <UserDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/teacher-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["Teacher", "Admin"]}>
-            <UserDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/management-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["Management", "Admin"]}>
-            <UserDashboard />
-          </ProtectedRoute>
-        }
-      />
+          
 
             {/* 🔹 Public Mock Test Routes */}
             <Route path="/mock-tests" element={<MockTestPage />} />
             <Route path="/create-mock-test" element={<CreateMockTest />} />
-            <Route path="/userpage" element={<UserPage />} />
+            
             
 
 
@@ -375,15 +362,7 @@ const AppRoutes = () => {
                 }
             />
 
-            {/* 🔹 User Protected Route */}
-            <Route
-                path="/user-dashboard"
-                element={
-                    <ProtectedRoute allowedRoles={["Student"]}>
-                        <UserDashboard />
-                    </ProtectedRoute>
-                }
-            />
+           
 
             {/* 🔹 Profile Route (Restricted to Logged-In Users) */}
             <Route

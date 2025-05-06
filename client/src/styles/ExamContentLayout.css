@@ -41,14 +41,20 @@
   }
   
   .option-box.correct {
-    background-color: #d4edda; /* green */
+    background-color: #d4edda;
     border-color: #28a745;
   }
   
   .option-box.incorrect {
-    background-color: #f8d7da; /* red */
+    background-color: #f8d7da;
     border-color: #dc3545;
   }
+  
+  .option-box.highlight-correct {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+  }
+  
   
   .explanation-toggle {
     margin-top: 12px;

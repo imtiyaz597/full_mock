@@ -63,17 +63,21 @@ const verifyRole = (roles) => (req, res, next) => {
 app.post("/api/auth/forgot-password", async (req, res) => {
   const { email } = req.body;
 
+  console.log("[FORGOT PASSWORD] Request received for email:", email);
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Clear previous tokens
     await PasswordReset.deleteMany({ email });
+    console.log("[FORGOT PASSWORD] Previous tokens cleared for:", email);
 
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = Date.now() + 3600000; // 1 hour
 
     await PasswordReset.create({ email, token, expiresAt });
+    console.log("[FORGOT PASSWORD] Password reset token created for:", email);
 
     const resetLink = `https://mock-full-stack-2.onrender.com/reset-password/${token}`;
     console.log("Reset Link:", resetLink);
@@ -83,6 +87,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 
     // ✅ Continue sending email in the background
     setImmediate(() => {
+      console.log("[FORGOT PASSWORD] Preparing to send reset email...");
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -105,13 +110,20 @@ app.post("/api/auth/forgot-password", async (req, res) => {
         `,
       };
 
-      transporter.sendMail(mailOptions).catch((err) => {
-        console.error("Error sending reset email:", err);
+      transporter.sendMail(mailOptions)
+      .then((info) => {
+        console.log("[FORGOT PASSWORD] Reset email sent successfully:", info.response);
+      })
+      .catch((err) => {
+        console.error("[FORGOT PASSWORD] Error sending reset email:", err);
+        if (err.response) {
+          console.error("[FORGOT PASSWORD] SMTP response:", err.response);
+        }
       });
     });
 
   } catch (err) {
-    console.error("Forgot password error:", err);
+    console.error("[FORGOT PASSWORD] General error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -123,14 +135,19 @@ app.post("/api/auth/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
+  console.log("[RESET PASSWORD] Request received with token:", token);
   try {
     const resetRecord = await PasswordReset.findOne({ token }).lean(); // lean() makes it faster
     if (!resetRecord || resetRecord.expiresAt < Date.now()) {
+      console.log("[RESET PASSWORD] Invalid or expired token:", token);
       return res.status(400).json({ message: "Token is invalid or expired" });
     }
 
     const user = await User.findOne({ email: resetRecord.email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      console.log("[RESET PASSWORD] User not found for email:", resetRecord.email);
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // ✅ Respond quickly
     res.json({ message: "Password has been reset successfully" });
@@ -184,6 +201,8 @@ app.post("/api/auth/signin", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    console.log(`✅ ${user.role} signed in: ${user.email}`);
+
 
     res.json({
       token,
@@ -255,7 +274,7 @@ app.post("/api/auth/register", async (req, res) => {
 
 
 
-// ✅ Admin creating new users
+
 app.post("/api/admin/users", verifyToken, verifyRole(["Admin"]), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -341,6 +360,10 @@ app.get("/api/admin/users", verifyToken, verifyRole(["Admin"]), async (req, res)
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
+
 
 
 // ✅ Add a User (Admin-Only)

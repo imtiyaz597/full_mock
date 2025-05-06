@@ -403,6 +403,14 @@ const QuestionOptions = ({
       } else if (isSelected) {
         className = "p-2 border rounded my-2 bg-primary text-white";
       }
+      
+      if (isSelected) {
+        console.log(
+          `🔍 Single-Select → Option ${val} clicked | Text: ${opt.text}`
+        );
+        console.log(`✅ Is this option correct? → ${isThisCorrect}`);
+      }
+      
 
       return (
         <div
